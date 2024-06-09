@@ -17,9 +17,11 @@ import ru.practicum.ewm.model.errors.NotFoundException;
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
-    @ExceptionHandler
+    @ExceptionHandler({ MethodArgumentNotValidException.class,
+            BadRequestException.class,
+            ConstraintViolationException.class })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handlerBadRequest(final BadRequestException e) {
+    public ErrorResponse handlerBadRequest(final RuntimeException e) {
         log.warn("400 {}", e.getMessage(), e);
         return new ErrorResponse("Object not available 400 ", e.getMessage());
     }
@@ -36,20 +38,6 @@ public class ErrorHandler {
     public ErrorResponse handleIntegrityException(final RuntimeException e) {
         log.warn("409 {}", e.getMessage(), e);
         return new ErrorResponse("No valid data 409", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleThrowable(final MethodArgumentNotValidException e) {
-        log.info("400 {}", e.getMessage(), e);
-        return new ErrorResponse("MethodArgumentNotValid", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleConstraintViolationException(final ConstraintViolationException e) {
-        log.error(e.getMessage());
-        return new ErrorResponse("ConstraintViolation", e.getMessage());
     }
 
     @ExceptionHandler
