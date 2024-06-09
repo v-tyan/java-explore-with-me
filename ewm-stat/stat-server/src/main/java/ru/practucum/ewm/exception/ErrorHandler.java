@@ -2,10 +2,13 @@ package ru.practucum.ewm.exception;
 
 import lombok.extern.slf4j.Slf4j;
 
+import javax.validation.ValidationException;
+
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -13,11 +16,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
-
-    @ExceptionHandler
+    @ExceptionHandler({ MethodArgumentNotValidException.class,
+            BadRequestException.class,
+            ConstraintViolationException.class, ValidationException.class,
+            MissingServletRequestParameterException.class })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handlerBadRequest(final BadRequestException e) {
-        log.warn("404 {}", e.getMessage(), e);
+    public ErrorResponse handlerBadRequest(final RuntimeException e) {
+        log.warn("400 {}", e.getMessage(), e);
         return new ErrorResponse("Object not available 400 ", e.getMessage());
     }
 
@@ -28,19 +33,6 @@ public class ErrorHandler {
         return new ErrorResponse("No valid data", e.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleThrowable(final MethodArgumentNotValidException e) {
-        log.info("400 {}", e.getMessage(), e);
-        return new ErrorResponse("MethodArgumentNotValid", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleConstraintViolationException(final ConstraintViolationException e) {
-        log.error(e.getMessage());
-        return new ErrorResponse("ConstraintViolation", e.getMessage());
-    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
