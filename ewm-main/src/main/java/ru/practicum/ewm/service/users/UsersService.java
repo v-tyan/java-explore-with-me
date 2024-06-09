@@ -18,5 +18,6 @@ public interface UsersService {
 
     List<UserDto> getUsers(Pageable pageable);
 
+    @Transactional
     void deleteUser(Long userId);
 }
