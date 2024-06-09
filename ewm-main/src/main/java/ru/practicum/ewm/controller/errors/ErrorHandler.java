@@ -1,6 +1,7 @@
 package ru.practicum.ewm.controller.errors;
 
 import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ import ru.practicum.ewm.model.errors.NotFoundException;
 public class ErrorHandler {
     @ExceptionHandler({ MethodArgumentNotValidException.class,
             BadRequestException.class,
-            ConstraintViolationException.class })
+            ConstraintViolationException.class, ValidationException.class })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlerBadRequest(final RuntimeException e) {
         log.warn("400 {}", e.getMessage(), e);
