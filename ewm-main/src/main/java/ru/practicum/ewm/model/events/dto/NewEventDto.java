@@ -29,7 +29,8 @@ public class NewEventDto {
     private String annotation;
     @NotNull
     private Integer category;
-    @NotNull
+    @NotBlank
+    @Size(max = 7000, min = 20)
     private String description;
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
