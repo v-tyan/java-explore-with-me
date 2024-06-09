@@ -64,7 +64,7 @@ public interface EventsPrivateController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    EventFullDto setEvent(@Valid @RequestBody NewEventDto newEventDto,
+    EventFullDto setEvent(@Validated @RequestBody NewEventDto newEventDto,
             @Positive @PathVariable Long userId);
 
     /**
