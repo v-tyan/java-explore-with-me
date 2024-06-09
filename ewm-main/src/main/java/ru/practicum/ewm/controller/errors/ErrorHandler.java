@@ -6,6 +6,7 @@ import javax.validation.ValidationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -20,7 +21,8 @@ import ru.practicum.ewm.model.errors.NotFoundException;
 public class ErrorHandler {
     @ExceptionHandler({ MethodArgumentNotValidException.class,
             BadRequestException.class,
-            ConstraintViolationException.class, ValidationException.class })
+            ConstraintViolationException.class, ValidationException.class,
+            MissingServletRequestParameterException.class })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlerBadRequest(final RuntimeException e) {
         log.warn("400 {}", e.getMessage(), e);
