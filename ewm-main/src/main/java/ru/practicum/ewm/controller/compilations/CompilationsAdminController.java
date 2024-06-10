@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
 import ru.practicum.ewm.model.compilations.dto.CompilationDto;
 import ru.practicum.ewm.model.compilations.dto.NewCompilationDto;
 import ru.practicum.ewm.model.compilations.dto.UpdateCompilationRequest;
+import ru.practicum.ewm.service.compilations.CompilationService;
 
 /**
  * API для работы с подборками событий
@@ -24,7 +26,9 @@ import ru.practicum.ewm.model.compilations.dto.UpdateCompilationRequest;
 @Validated
 @RestController
 @RequestMapping("/admin/compilations")
-public interface CompilationsAdminController {
+@RequiredArgsConstructor
+public class CompilationsAdminController {
+    private final CompilationService service;
 
     /**
      * @param newCompilationDto данные новой подборки
@@ -34,7 +38,9 @@ public interface CompilationsAdminController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    CompilationDto setCompilation(@Valid @RequestBody NewCompilationDto newCompilationDto);
+    CompilationDto setCompilation(@Valid @RequestBody NewCompilationDto newCompilationDto) {
+        return service.setCompilation(newCompilationDto);
+    }
 
     /**
      * @param compId id подборки
@@ -43,7 +49,9 @@ public interface CompilationsAdminController {
      */
     @DeleteMapping("{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteCompilation(@Positive @PathVariable Integer compId);
+    void deleteCompilation(@Positive @PathVariable Integer compId) {
+        service.deleteCompilation(compId);
+    }
 
     /**
      * @param updateCompilationRequest данные для обновления подборки
@@ -54,5 +62,7 @@ public interface CompilationsAdminController {
     @PatchMapping("{compId}")
     CompilationDto updateCompilation(
             @Valid @RequestBody UpdateCompilationRequest updateCompilationRequest,
-            @PathVariable Integer compId);
+            @PathVariable Integer compId) {
+        return service.updateCompilation(updateCompilationRequest, compId);
+    }
 }

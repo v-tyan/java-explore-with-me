@@ -6,6 +6,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
 import ru.practicum.ewm.model.events.dto.EventFullDto;
 import ru.practicum.ewm.model.events.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.ewm.model.events.dto.EventRequestStatusUpdateResult;
@@ -25,6 +28,7 @@ import ru.practicum.ewm.model.events.dto.EventShortDto;
 import ru.practicum.ewm.model.events.dto.NewEventDto;
 import ru.practicum.ewm.model.events.dto.UpdateEventUserRequest;
 import ru.practicum.ewm.model.requests.dto.ParticipationRequestDto;
+import ru.practicum.ewm.service.events.EventsPrivateService;
 
 /**
  * Закрытый API для работы с событиями
@@ -32,7 +36,9 @@ import ru.practicum.ewm.model.requests.dto.ParticipationRequestDto;
 @Validated
 @RestController
 @RequestMapping("/users/{userId}/events")
-public interface EventsPrivateController {
+@RequiredArgsConstructor
+public class EventsPrivateController {
+    private final EventsPrivateService service;
 
     /**
      * Получение событий, добавленных текущим пользователем
@@ -49,7 +55,10 @@ public interface EventsPrivateController {
     @GetMapping
     List<EventShortDto> getEvents(@Positive @PathVariable Long userId,
             @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-            @Positive @RequestParam(defaultValue = "10") Integer size);
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
+        Pageable pageable = PageRequest.of(from, size);
+        return service.getEvents(userId, pageable);
+    }
 
     /**
      * Добавление нового события
@@ -65,7 +74,9 @@ public interface EventsPrivateController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     EventFullDto setEvent(@Valid @RequestBody NewEventDto newEventDto,
-            @Positive @PathVariable Long userId);
+            @Positive @PathVariable Long userId) {
+        return service.setEvent(newEventDto, userId);
+    }
 
     /**
      * Получение полной информации о событии добавленном текущим пользователем
@@ -78,7 +89,9 @@ public interface EventsPrivateController {
      */
     @GetMapping("{eventId}")
     EventFullDto getEvent(@Positive @PathVariable Long userId,
-            @Positive @PathVariable Long eventId);
+            @Positive @PathVariable Long eventId) {
+        return service.getEvent(userId, eventId);
+    }
 
     /**
      * @param userId                 id текущего пользователя
@@ -92,7 +105,9 @@ public interface EventsPrivateController {
     @PatchMapping("{eventId}")
     EventFullDto updateEvent(@Positive @PathVariable Long userId,
             @Positive @PathVariable Long eventId,
-            @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest);
+            @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest) {
+        return service.updateEvent(userId, eventId, updateEventUserRequest);
+    }
 
     /**
      * В случае, если по заданным фильтрам не найдено ни одной заявки, возвращает
@@ -105,7 +120,9 @@ public interface EventsPrivateController {
      */
     @GetMapping("{eventId}/requests")
     List<ParticipationRequestDto> getEventRequests(@PathVariable Long userId,
-            @PathVariable Long eventId);
+            @PathVariable Long eventId) {
+        return service.getEventRequests(userId, eventId);
+    }
 
     /**
      * Изменение статуса (подтверждена, отменена) заявок на участие в событии
@@ -134,5 +151,7 @@ public interface EventsPrivateController {
     EventRequestStatusUpdateResult updateEventStatusRequest(
             @RequestBody EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest,
             @PathVariable Long userId,
-            @PathVariable Long eventId);
+            @PathVariable Long eventId) {
+        return service.updateEventStatusRequest(eventRequestStatusUpdateRequest, userId, eventId);
+    }
 }

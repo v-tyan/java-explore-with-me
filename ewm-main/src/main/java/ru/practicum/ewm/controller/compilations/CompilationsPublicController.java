@@ -5,6 +5,8 @@ import java.util.List;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
 import ru.practicum.ewm.model.compilations.dto.CompilationDto;
+import ru.practicum.ewm.service.compilations.CompilationService;
 
 /**
  * Публичный API для работы с подборками событий
@@ -20,7 +24,10 @@ import ru.practicum.ewm.model.compilations.dto.CompilationDto;
 @Validated
 @RestController
 @RequestMapping("/compilations")
-public interface CompilationsPublicController {
+@RequiredArgsConstructor
+public class CompilationsPublicController {
+    private final CompilationService service;
+
     /**
      * @param pinned искать только закрепленные/не закрепленные подборки
      * @param from   количество элементов, которые нужно пропустить для формирования
@@ -34,7 +41,13 @@ public interface CompilationsPublicController {
     List<CompilationDto> getCompilations(
             @RequestParam(required = false) Boolean pinned,
             @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-            @Positive @RequestParam(defaultValue = "10") Integer size);
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
+        Pageable pageable = PageRequest.of(from, size);
+        if (pinned == null) {
+            return service.getCompilations(pageable);
+        }
+        return service.getCompilations(pinned, pageable);
+    }
 
     /**
      * @param compId id подборки
@@ -44,5 +57,7 @@ public interface CompilationsPublicController {
      *         Запрос составлен некорректно - 400 ApiError
      */
     @GetMapping("{compId}")
-    CompilationDto getCompilation(@Positive @PathVariable Integer compId);
+    CompilationDto getCompilation(@Positive @PathVariable Integer compId) {
+        return service.getCompilation(compId);
+    }
 }

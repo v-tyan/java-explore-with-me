@@ -17,9 +17,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
 import ru.practicum.ewm.model.events.State;
 import ru.practicum.ewm.model.events.dto.EventFullDto;
 import ru.practicum.ewm.model.events.dto.UpdateEventAdminRequest;
+import ru.practicum.ewm.service.events.EventsAdminService;
 
 /**
  * API для работы с событиями
@@ -27,7 +29,9 @@ import ru.practicum.ewm.model.events.dto.UpdateEventAdminRequest;
 @Validated
 @RestController
 @RequestMapping("/admin/events")
-public interface EventsAdminController {
+@RequiredArgsConstructor
+public class EventsAdminController {
+    private final EventsAdminService service;
 
     /**
      * Поиск событий
@@ -55,7 +59,9 @@ public interface EventsAdminController {
             @RequestParam(required = false) String rangeStart,
             @RequestParam(required = false) String rangeEnd,
             @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-            @Positive @RequestParam(defaultValue = "10") Integer size);
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
+        return service.getEvents(users, categories, states, rangeStart, rangeEnd, from, size);
+    }
 
     /**
      * Редактирование данных события и его статуса (отклонение/публикация).
@@ -79,5 +85,7 @@ public interface EventsAdminController {
     @PatchMapping("{eventId}")
     EventFullDto updateEvent(
             @Valid @RequestBody UpdateEventAdminRequest updateEventAdminRequest,
-            @PathVariable Long eventId);
+            @PathVariable Long eventId) {
+        return service.updateEvent(updateEventAdminRequest, eventId);
+    }
 }

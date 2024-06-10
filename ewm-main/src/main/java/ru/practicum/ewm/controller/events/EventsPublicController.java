@@ -6,6 +6,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
 import ru.practicum.ewm.model.events.dto.EventFullDto;
 import ru.practicum.ewm.model.events.dto.EventShortDto;
+import ru.practicum.ewm.service.events.EventService;
 
 /**
  * Публичный API для работы с событиями
@@ -22,7 +26,9 @@ import ru.practicum.ewm.model.events.dto.EventShortDto;
 @Validated
 @RestController
 @RequestMapping("/events")
-public interface EventsPublicController {
+@RequiredArgsConstructor
+public class EventsPublicController {
+    private final EventService service;
 
     /**
      * Получение событий с возможностью фильтрации
@@ -67,7 +73,11 @@ public interface EventsPublicController {
             @RequestParam(defaultValue = "false") Boolean onlyAvailable,
             @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
             @Positive @RequestParam(defaultValue = "10") Integer size,
-            HttpServletRequest request);
+            HttpServletRequest request) {
+        Pageable pageable = PageRequest.of(from, size);
+        return service.getEvents(text, categories, paid, rangeStart, rangeEnd, sort, onlyAvailable, pageable,
+                request);
+    }
 
     /**
      * событие должно быть опубликовано
@@ -84,5 +94,7 @@ public interface EventsPublicController {
      */
     @GetMapping("{eventId}")
     EventFullDto getEvent(@PathVariable Long eventId,
-            HttpServletRequest request);
+            HttpServletRequest request) {
+        return service.getEvent(eventId, request);
+    }
 }

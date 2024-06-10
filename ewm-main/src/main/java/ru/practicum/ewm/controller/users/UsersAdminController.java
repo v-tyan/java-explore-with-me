@@ -6,6 +6,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,8 +20,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
 import ru.practicum.ewm.model.users.dto.NewUserRequest;
 import ru.practicum.ewm.model.users.dto.UserDto;
+import ru.practicum.ewm.service.users.UsersService;
 
 /**
  * API для работы с пользователями
@@ -28,7 +32,10 @@ import ru.practicum.ewm.model.users.dto.UserDto;
 @Validated
 @RestController
 @RequestMapping("/admin/users")
-public interface UsersAdminController {
+@RequiredArgsConstructor
+public class UsersAdminController {
+    private final UsersService service;
+
     /**
      * Возвращает информацию обо всех пользователях (учитываются параметры
      * ограничения выборки),
@@ -46,7 +53,13 @@ public interface UsersAdminController {
     @GetMapping()
     List<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
             @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-            @Positive @RequestParam(defaultValue = "10") Integer size);
+            @Positive @RequestParam(defaultValue = "10") Integer size) {
+        Pageable pageable = PageRequest.of(from, size);
+        if (ids == null || ids.isEmpty()) {
+            return service.getUsers(pageable);
+        }
+        return service.getUsers(ids, pageable);
+    }
 
     /**
      * @param newUserRequest Данные добавляемого пользователя
@@ -56,7 +69,9 @@ public interface UsersAdminController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    UserDto setUser(@RequestBody @Valid NewUserRequest newUserRequest);
+    UserDto setUser(@RequestBody @Valid NewUserRequest newUserRequest) {
+        return service.setUser(newUserRequest);
+    }
 
     /**
      * @param userId id пользователя
@@ -65,5 +80,7 @@ public interface UsersAdminController {
      */
     @DeleteMapping("{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteUser(@PathVariable Long userId);
+    void deleteUser(@PathVariable Long userId) {
+        service.deleteUser(userId);
+    }
 }

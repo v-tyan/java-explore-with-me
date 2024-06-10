@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
 import ru.practicum.ewm.model.requests.dto.ParticipationRequestDto;
+import ru.practicum.ewm.service.requests.RequestsService;
 
 /**
  * Закрытый API для работы с запросами текущего пользователя на участие в
@@ -24,7 +26,9 @@ import ru.practicum.ewm.model.requests.dto.ParticipationRequestDto;
 @Validated
 @RestController
 @RequestMapping("users/{userId}/requests")
-public interface RequestsPrivateController {
+@RequiredArgsConstructor
+public class RequestsPrivateController {
+    private final RequestsService requestsService;
 
     /**
      * Получение информации о запросах на участие в событии текущего пользователя
@@ -37,7 +41,9 @@ public interface RequestsPrivateController {
      *         404 - Пользователь не найден ApiError
      */
     @GetMapping()
-    List<ParticipationRequestDto> getRequest(@PathVariable Long userId);
+    List<ParticipationRequestDto> getRequest(@PathVariable Long userId) {
+        return requestsService.getRequest(userId);
+    }
 
     /**
      * нельзя добавить повторный запрос (Ожидается код ошибки 409)
@@ -60,7 +66,9 @@ public interface RequestsPrivateController {
     @ResponseStatus(HttpStatus.CREATED)
     ParticipationRequestDto setRequest(
             @Positive @RequestParam Long eventId,
-            @Positive @PathVariable Long userId);
+            @Positive @PathVariable Long userId) {
+        return requestsService.setRequest(eventId, userId);
+    }
 
     /**
      * Отмена своего запроса на участие в событии
@@ -71,5 +79,7 @@ public interface RequestsPrivateController {
      *         404 - Запрос не найден или недоступен ApiError
      */
     @PatchMapping("/{requestId}/cancel")
-    ParticipationRequestDto updateRequest(@PathVariable Long userId, @PathVariable Long requestId);
+    ParticipationRequestDto updateRequest(@PathVariable Long userId, @PathVariable Long requestId) {
+        return requestsService.updateRequest(userId, requestId);
+    }
 }

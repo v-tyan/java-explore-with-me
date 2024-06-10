@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.RequiredArgsConstructor;
 import ru.practicum.ewm.model.categories.dto.CategoryDto;
 import ru.practicum.ewm.model.categories.dto.NewCategoryDto;
+import ru.practicum.ewm.service.categories.CategoriesService;
 
 /**
  * API для работы с категориями
@@ -23,7 +25,9 @@ import ru.practicum.ewm.model.categories.dto.NewCategoryDto;
 @Validated
 @RestController
 @RequestMapping("/admin/categories")
-public interface CategoriesAdminController {
+@RequiredArgsConstructor
+public class CategoriesAdminController {
+    private final CategoriesService service;
 
     /**
      * @param newCategoryDto данные добавляемой категории
@@ -34,14 +38,18 @@ public interface CategoriesAdminController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    CategoryDto setCategory(@Valid @RequestBody NewCategoryDto newCategoryDto);
+    CategoryDto setCategory(@Valid @RequestBody NewCategoryDto newCategoryDto) {
+        return service.setCategory(newCategoryDto);
+    }
 
     /**
      * @param catId id категории
      */
     @DeleteMapping("{catId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteCategory(@Positive @PathVariable Integer catId);
+    void deleteCategory(@Positive @PathVariable Integer catId) {
+        service.deleteCategory(catId);
+    }
 
     /**
      * @param categoryDto Данные категории для изменения
@@ -53,5 +61,7 @@ public interface CategoriesAdminController {
      */
     @PatchMapping("{catId}")
     CategoryDto updateCategory(@RequestBody @Valid CategoryDto categoryDto,
-            @Positive @PathVariable Integer catId);
+            @Positive @PathVariable Integer catId) {
+        return service.updateCategory(categoryDto, catId);
+    }
 }
