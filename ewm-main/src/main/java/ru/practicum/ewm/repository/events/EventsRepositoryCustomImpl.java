@@ -20,11 +20,12 @@ import ru.practicum.ewm.model.events.State;
 
 @Repository
 @RequiredArgsConstructor
-public class EventsDao {
+public class EventsRepositoryCustomImpl implements EventsRepositoryCustom {
     private final EntityManager entityManager;
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public List<Event> findEvents(List<Integer> users,
+    @Override
+    public List<Event> findEventsByCriteria(List<Integer> users,
             List<State> states,
             List<Integer> categories,
             String rangeStart,
