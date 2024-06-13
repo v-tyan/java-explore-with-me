@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -51,12 +53,24 @@ public class EventsAdminServiceImpl implements EventsAdminService {
             String rangeEnd,
             Integer from,
             Integer size) {
+        // List<EventFullDto> fullEventDtoList = eventsRepository
+        // .findEventsByCriteria(users, states, categories, rangeStart, rangeEnd, from,
+        // size)
+        // .stream()
+        // .limit(size)
+        // .map(EventMapper.EVENT_MAPPER::toEventFullDto)
+        // .collect(Collectors.toList());
+
         List<EventFullDto> fullEventDtoList = eventsRepository
-                .findEventsByCriteria(users, states, categories, rangeStart, rangeEnd, from, size)
+                .findAll(Specification.where(EventsRepository.hasUsers(users))
+                        .and(EventsRepository.hasCategories(categories))
+                        .and(EventsRepository.hasStates(states))
+                        .and(EventsRepository.hasRange(rangeStart, rangeEnd)), PageRequest.of(from, size))
                 .stream()
                 .limit(size)
                 .map(EventMapper.EVENT_MAPPER::toEventFullDto)
                 .collect(Collectors.toList());
+
         List<Long> ids = fullEventDtoList.stream().map(EventFullDto::getId).collect(Collectors.toList());
         List<ParticipationRequest> requests = requestsRepository.findConfirmedToListEvents(ids);
         EventUtil.getConfirmedRequests(fullEventDtoList, requests);

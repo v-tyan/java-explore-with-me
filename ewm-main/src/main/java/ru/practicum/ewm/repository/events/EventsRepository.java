@@ -1,19 +1,48 @@
 package ru.practicum.ewm.repository.events;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.persistence.criteria.Predicate;
+
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import ru.practicum.ewm.model.events.Event;
 import ru.practicum.ewm.model.events.State;
 
-public interface EventsRepository extends JpaRepository<Event, Long>, EventsRepositoryCustom {
+public interface EventsRepository
+        extends JpaRepository<Event, Long>, EventsRepositoryCustom, JpaSpecificationExecutor<Event> {
+
+    static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    static Specification<Event> hasUsers(List<Integer> users) {
+        return (event, cq, cb) -> cb.and(cq.from(Event.class).get("initiator").get("id").in(users));
+    }
+
+    static Specification<Event> hasCategories(List<Integer> categories) {
+        return (event, cq, cb) -> cb.and(cq.from(Event.class).get("category").get("id").in(categories));
+    }
+
+    static Specification<Event> hasStates(List<State> states) {
+        return (event, cq, cb) -> cb.and(states.stream()
+                .map(eventState -> cb.equal(cq.from(Event.class).get("state"), eventState))
+                .toArray(Predicate[]::new));
+    }
+
+    static Specification<Event> hasRange(String rangeStart, String rangeEnd) {
+        LocalDateTime start = LocalDateTime.parse(rangeStart, FORMATTER);
+        LocalDateTime end = LocalDateTime.parse(rangeEnd, FORMATTER);
+        return (event, cq, cb) -> cb.and(cb.between(cq.from(Event.class).get("eventDate"), start, end));
+    }
+
     List<Event> findAllByInitiatorId(Long userId, Pageable pageable);
 
     Optional<Event> findByInitiatorIdAndId(Long initiatorId, Long id);
