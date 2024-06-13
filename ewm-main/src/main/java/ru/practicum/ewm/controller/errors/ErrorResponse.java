@@ -1,19 +1,11 @@
 package ru.practicum.ewm.controller.errors;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class ErrorResponse {
-    private String error;
-    private String description;
-
-    public ErrorResponse(String error) {
-        this.error = error;
-    }
-
-    public ErrorResponse(String error, String description) {
-        this.error = error;
-        this.description = description;
-    }
-
+    private final String error;
+    private final String description;
 }

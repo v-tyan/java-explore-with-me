@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import ru.practicum.ewm.model.events.Event;
 import ru.practicum.ewm.model.events.State;
 
-public interface EventsRepository extends JpaRepository<Event, Long> {
+public interface EventsRepository extends JpaRepository<Event, Long>, EventsRepositoryCustom {
     List<Event> findAllByInitiatorId(Long userId, Pageable pageable);
 
     Optional<Event> findByInitiatorIdAndId(Long initiatorId, Long id);

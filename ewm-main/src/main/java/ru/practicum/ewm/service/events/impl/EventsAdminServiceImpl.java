@@ -25,7 +25,6 @@ import ru.practicum.ewm.model.events.dto.EventFullDto;
 import ru.practicum.ewm.model.events.dto.UpdateEventAdminRequest;
 import ru.practicum.ewm.model.requests.ParticipationRequest;
 import ru.practicum.ewm.repository.categories.CategoriesRepository;
-import ru.practicum.ewm.repository.events.EventsDao;
 import ru.practicum.ewm.repository.events.EventsRepository;
 import ru.practicum.ewm.repository.events.util.EventUtil;
 import ru.practicum.ewm.repository.location.LocationRepository;
@@ -42,8 +41,6 @@ public class EventsAdminServiceImpl implements EventsAdminService {
     private final CategoriesRepository categoriesRepository;
     private final LocationRepository locationRepository;
 
-    private final EventsDao eventsDao;
-
     private final StatService statService;
 
     @Override
@@ -54,8 +51,8 @@ public class EventsAdminServiceImpl implements EventsAdminService {
             String rangeEnd,
             Integer from,
             Integer size) {
-        List<EventFullDto> fullEventDtoList = eventsDao
-                .findEvents(users, states, categories, rangeStart, rangeEnd, from, size)
+        List<EventFullDto> fullEventDtoList = eventsRepository
+                .findEventsByCriteria(users, states, categories, rangeStart, rangeEnd, from, size)
                 .stream()
                 .limit(size)
                 .map(EventMapper.EVENT_MAPPER::toEventFullDto)
